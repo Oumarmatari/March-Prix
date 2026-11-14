@@ -30,14 +30,14 @@ function renderProducts() {
       }
       return a.name.localeCompare(b.name, "fr");
     });
-  productGrid.innerHTML = visibleProducts.map((product) => {
+  productGrid.innerHTML = visibleProducts.map((product, index) => {
     const cheapest = getLowestPrice(product);
     const cheapestMarket = markets.find((market) => market.id === cheapest.marketId);
 
     return `
-      <article class="product-card">
+      <article class="product-card" style="--card-index: ${index}">
         <div class="product-top">
-          <span class="product-emoji" aria-hidden="true">${product.emoji}</span>
+          <img class="product-emoji product-photo" src="${product.image}" alt="Photo de ${product.name}" loading="lazy" decoding="async">
           <div class="product-meta">
             <h3>${product.name}</h3>
             <p>${product.category}</p>
@@ -73,3 +73,25 @@ sortSelect.addEventListener("change", renderProducts);
 document.querySelector("#year").textContent = new Date().getFullYear();
 
 renderProducts();
+
+const revealElements = document.querySelectorAll(
+  ".comparison .section-heading, .comparison .filters, .comparison .result-count, .tip-section",
+);
+
+if ("IntersectionObserver" in window) {
+  const revealObserver = new IntersectionObserver((entries, observer) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add("is-visible");
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.12 });
+
+  revealElements.forEach((element) => {
+    element.classList.add("reveal-on-scroll");
+    revealObserver.observe(element);
+  });
+} else {
+  revealElements.forEach((element) => element.classList.add("is-visible"));
+}
